@@ -6,6 +6,8 @@ import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:http/http.dart' as pubhttp;
 import 'package:location/location.dart';
+import 'package:path/path.dart' as pat;
+import 'package:path_provider/path_provider.dart' as syspath;
 import 'package:save_my_locations/controller/controller.dart';
 
 class GetLocation extends ConsumerWidget {
@@ -49,18 +51,25 @@ class GetLocation extends ConsumerWidget {
       final lat = locationData.latitude;
       final lon = locationData.longitude;
 
-      final geoGetterUrl =
-          Uri.parse("https://geocode.maps.co/reverse?lat=$lat&lon=$lon");
-      final response = await pubhttp.get(geoGetterUrl);
-      ref.read(newData.notifier).getAddress =
-          jsonDecode(response.body)["display_name"];
+      print(">>>lat =  $lat\n>>>lon = $lon");
+      ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(">>>lat =  $lat\n>>>lon = $lon")));
 
-      // ref.read(newData.notifier).getAddressPic =
-      //     'https://www.mapquestapi.com/staticmap/v5/map?key=$apiKey&center=$lat,$lon,MA&size=170,170@2x';
+      final geoGetterUrl1 =
+          Uri.parse("https://geocode.maps.co/reverse?lat=$lat&lon=$lon");
+      final response1 = await pubhttp.get(geoGetterUrl1);
+      ref.read(newData.notifier).getAddress =
+          jsonDecode(response1.body)["display_name"];
 
       File imageFile = await DefaultCacheManager().getSingleFile(
           'https://www.mapquestapi.com/staticmap/v5/map?key=$apiKey&center=$lat,$lon,MA&size=170,170@2x');
-      ref.read(newData.notifier).getAddressPic = imageFile.path;
+
+      final appDir = await syspath.getApplicationDocumentsDirectory();
+      final fileName = pat.basename(imageFile.path);
+      final copiedImage =
+          await File(imageFile.path).copy('${appDir.path}/$fileName');
+
+      ref.read(newData.notifier).getAddressPic = copiedImage.path;
 
       ref.read(gettingLocation.notifier).state = false;
     }

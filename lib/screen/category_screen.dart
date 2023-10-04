@@ -13,6 +13,9 @@ class Category extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final dataList = ref.watch(preData) as List<Data>;
+
+    ref.read(preData.notifier).loadPlace();
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('My Places'),

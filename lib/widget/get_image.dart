@@ -1,7 +1,10 @@
 import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:path/path.dart' as pat;
+import 'package:path_provider/path_provider.dart' as syspath;
 import 'package:save_my_locations/controller/controller.dart';
 
 class GetImage extends ConsumerWidget {
@@ -19,7 +22,13 @@ class GetImage extends ConsumerWidget {
       if (pickedImage == null) {
         return;
       }
-      ref.read(newData.notifier).dataImage = pickedImage.path;
+
+      final appDir = await syspath.getApplicationDocumentsDirectory();
+      final fileName = pat.basename(pickedImage.path);
+      final copiedImage =
+          await File(pickedImage.path).copy('${appDir.path}/$fileName');
+
+      ref.read(newData.notifier).dataImage = copiedImage.path;
     }
 
     void selectPicture() async {
